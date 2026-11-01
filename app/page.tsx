@@ -1,7 +1,7 @@
 'use client'
-
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Package, TriangleAlert, IndianRupee } from 'lucide-react'
+import { Package, TriangleAlert, IndianRupee, LogOut } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import type { Product } from '@/lib/types'
 import AddProductForm from '@/components/AddProductForm'
@@ -15,6 +15,7 @@ import {
 } from '@/lib/prediction'
 
 export default function Home() {
+  const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -39,8 +40,22 @@ export default function Home() {
     }
   }
 
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
   useEffect(() => {
-    loadProducts()
+    async function init() {
+      const { data } = await supabase.auth.getSession()
+      if (!data.session) {
+        router.push('/login')
+        return
+      }
+      loadProducts()
+    }
+    init()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (loading) return <p className="p-8">Loading...</p>
@@ -52,7 +67,16 @@ export default function Home() {
 
   return (
     <main className="p-4 sm:p-8">
-      <h1 className="text-2xl font-bold mb-4">Inventory Dashboard</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Inventory Dashboard</h1>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 rounded bg-red-600 px-4 py-2 text-white"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </button>
+      </div>
 
       {/* Metric cards */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
