@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";            // added useRef
+import { X } from "lucide-react";                    // added X icon
 import { supabase } from "@/lib/supabaseClient";
 
 type Props = {
@@ -16,6 +17,14 @@ export default function AddProductForm({ onAdded }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const fileInputRef = useRef<HTMLInputElement>(null);   // added
+
+  // added: clears both React state and the browser's file input
+  function clearFile() {
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
 
   async function handleSubmit() {
     setError("");
@@ -61,7 +70,7 @@ export default function AddProductForm({ onAdded }: Props) {
       setStock("");
       setThreshold("10");
       setDailySales("2.5");
-      setFile(null);
+      clearFile();                                       // changed: was setFile(null)
       onAdded();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -82,7 +91,28 @@ export default function AddProductForm({ onAdded }: Props) {
         <input className={inputClass} type="number" placeholder="Current stock" value={stock} onChange={(e) => setStock(e.target.value)} />
         <input className={inputClass} type="number" placeholder="Min threshold" value={threshold} onChange={(e) => setThreshold(e.target.value)} />
         <input className={inputClass} type="number" step="0.1" placeholder="Avg daily sales" value={dailySales} onChange={(e) => setDailySales(e.target.value)} />
-        <input className={inputClass} type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+
+        {/* changed: file input wrapped with a remove button */}
+        <div className="relative">
+          <input
+            ref={fileInputRef}
+            className={`${inputClass} pr-12`}
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+          {file && (
+            <button
+              type="button"
+              onClick={clearFile}
+              disabled={loading}
+              aria-label="Remove selected file"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-gray-200 p-1 text-black hover:bg-red-600 hover:text-white disabled:opacity-50"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {error && <p className="text-red-600 mt-3 text-sm">{error}</p>}
