@@ -7,6 +7,7 @@ import type { Product } from '@/lib/types'
 import AddProductForm from '@/components/AddProductForm'
 import StockBarChart from '@/components/StockBarChart'
 import SalesLineChart from '@/components/SalesLineChart'
+import RecordSaleCard from '@/components/RecordSaleCard';
 import {
   daysRemaining,
   stockoutDate,
@@ -131,6 +132,8 @@ export default function Home() {
       </div>
 
       <AddProductForm onAdded={loadProducts} />
+      <RecordSaleCard products={products} onSaved={loadProducts} />
+
 
       {/* Table (phone par side me scroll hoti hai) */}
       <div className="overflow-x-auto">
