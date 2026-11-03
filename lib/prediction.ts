@@ -4,6 +4,10 @@ export type StockStatus = 'urgent' | 'low' | 'ok'
 
 export const TARGET_COVER_DAYS = 14
 
+function avgSales(p: Product): number {
+  return Number(p.effective_avg_sales ?? p.daily_avg_sales)
+}
+
 export function daysRemaining(stock: number, avgDailySales: number): number | null {
   const s = Number(stock)
   const a = Number(avgDailySales)
@@ -20,15 +24,14 @@ export function stockoutDate(days: number | null): Date | null {
 }
 
 export function getStatus(p: Product): StockStatus {
-  const days = daysRemaining(p.current_stock, p.daily_avg_sales)
+  const days = daysRemaining(p.current_stock, avgSales(p))
   if (days !== null && days < 5) return 'urgent'
   if (p.current_stock <= p.min_threshold) return 'low'
   return 'ok'
 }
 
-// Itne units mangwane padenge taaki TARGET_COVER_DAYS din ka stock ho jaye
 export function unitsNeeded(p: Product): number {
-  const need = Math.ceil(TARGET_COVER_DAYS * Number(p.daily_avg_sales) - Number(p.current_stock))
+  const need = Math.ceil(TARGET_COVER_DAYS * avgSales(p) - Number(p.current_stock))
   return need > 0 ? need : 0
 }
 

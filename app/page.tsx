@@ -22,7 +22,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
 
   async function loadProducts() {
-    const { data, error } = await supabase.from('products').select('*')
+    const { data, error } = await supabase.from('product_stats').select('*')
     if (error) {
       setError(error.message)
     } else {
@@ -114,7 +114,7 @@ export default function Home() {
           </p>
           <ul className="mt-2 list-disc pl-5 text-sm">
             {urgentProducts.map((p) => {
-              const days = daysRemaining(p.current_stock, p.daily_avg_sales)
+              const days = daysRemaining(p.current_stock, p.effective_avg_sales)
               return (
                 <li key={p.id}>
                   {p.name} ({days === 0 ? 'out of stock' : `${days?.toFixed(1)} days left`})
@@ -154,7 +154,7 @@ export default function Home() {
           </thead>
           <tbody>
             {products.map((p) => {
-              const days = daysRemaining(p.current_stock, p.daily_avg_sales)
+              const days = daysRemaining(p.current_stock, p.effective_avg_sales)
               const out = stockoutDate(days)
               const status = getStatus(p)
               return (
@@ -174,7 +174,9 @@ export default function Home() {
                   <td className="border p-2">{p.category}</td>
                   <td className="border p-2">{p.current_stock}</td>
                   <td className="border p-2">{p.min_threshold}</td>
-                  <td className="border p-2">{p.daily_avg_sales}</td>
+                  <td className="border p-2">
+  {Number(p.effective_avg_sales ?? p.daily_avg_sales).toFixed(1)}
+</td>
                   <td className="border p-2">
                     {days === null ? '—' : days.toFixed(1)}
                   </td>

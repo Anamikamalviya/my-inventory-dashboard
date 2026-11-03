@@ -5,6 +5,8 @@ export type Product = {
   current_stock: number
   min_threshold: number
   daily_avg_sales: number
+  sold_7d: number;
+  effective_avg_sales: number;
   unit_cost: number
   image_url: string | null
   created_at: string
